@@ -142,15 +142,20 @@
                         return;
                     }
 
-                    // esc
-                    if (e.which === 27) {
-                        isRecordStarted = false;
-                    }
-
                     // really restart
                     if (e.altKey === true && e.which === 192) {
                         start();
                         stopEvent(e);
+                        return;
+                    }
+
+                    // esc
+                    if (e.which === 27) {
+                        isRecordStarted = false;
+                        cancelButton.click();
+
+                        stopEvent(e);
+                        return;
                     }
 
                     // restart if miss key
