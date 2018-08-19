@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.1
+// @version      0.0.2
 // @description  TI GDE?
 // @author       Alexander Holovin
-// @match        https://vk.com/im?peers=*
+// @match        https://vk.com/im?sel=-*
 // @grant        none
 // ==/UserScript==
 
@@ -204,7 +204,7 @@
         const messageMore = 'Если ты готов записать для теслаплеера еще одно сообщение, нажми кнопку "Еще!"';
         const messagePCheck = 'А пока, если ты не против, еще одна просьба. Я не уверен, что одно из голосовых верное. Мог бы ты послушать запись и сказать, дословно верный ли звучит текст? Я просил записать этот: ';
         const messagePRecord = 'Проигрыватель понимает только голосовую команду, пожалуйста запиши голосовое сообщение со следующим текстом: ';
-        const messagePBalance = 'Твой баланс '
+        const messagePBalance = 'Твой баланс ';
 
         // ok after recording
         if (messageTextBlock.innerText.startsWith(messageThanks)) {
@@ -241,7 +241,7 @@
 
         // go next (autoclick!)
         if (messageTextBlock.innerText.startsWith(messageMore)) {
-            messageTextBlock.innerText = '<< ещё >>';
+            messageTextBlock.innerText = '<< подождите пару секунд >>';
 
             setTimeout(() => refreshKeyboard('Ещё!'), 2500);
             return;
