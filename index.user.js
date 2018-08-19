@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.4
+// @version      0.0.4b
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -71,7 +71,7 @@
             }
 
             if (button.textContent.includes('Ещё!')) {
-                button.textContent = `Ещё (${updatesCount})`;
+                button.textContent = `Ещё! (${updatesCount})`;
             }
         });
 
@@ -93,9 +93,9 @@
 
                 }
 
-                updatesCount++;
                 buttons.forEach(button => {
                     if (button.textContent.includes('Ещё!')) {
+                        updatesCount++;
                         setTimeout(() => button.click(), 1750);
                         return;
                     }
