@@ -214,7 +214,7 @@
 
         // ok after check correct
         if (messageTextBlock.innerText.startsWith(messageCool)) {
-            messageTextBlock.innerText = '.';
+            messageTextBlock.innerText = ' ';
             return;
         }
 
@@ -241,6 +241,7 @@
 
         // go next (autoclick!)
         if (messageTextBlock.innerText.startsWith(messageMore)) {
+            messageTextBlock.innerText = ' ';
             refreshKeyboard('Ещё!');
             return;
         }
