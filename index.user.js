@@ -76,7 +76,8 @@
                     buttons.forEach(button => {
                         if (button.textContent.includes('Баланс')) {
                             button.disabled = false;
-                            button.click();
+
+                            setTimeout(() => button.click(), 1500);
                             return;
                         }
                     });
