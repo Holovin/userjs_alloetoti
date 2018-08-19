@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.2
+// @version      0.0.3
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -41,9 +41,12 @@
     function start() {
         document.removeEventListener('keydown', starterHandler, true);
 
+        const colors = ['#f1f8e9', '#f9fbe7', '#e8f5e9', '#e0f2f1', '#e0f7fa', '#e1f5fe', '#fffde7', '#eceff1',
+                        '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe', '#f3e5f5'];
+
         const inputBlock = target.querySelector('div.im_editable');
         inputBlock.contentEditable = false;
-        inputBlock.style.background = '#f1f8e9';
+        inputBlock.style.background = colors[Math.floor(Math.random() * colors.length)];
 
         const messages = document.querySelectorAll('li.im-mess');
 
@@ -139,8 +142,15 @@
                         return;
                     }
 
+                    // esc
                     if (e.which === 27) {
                         isRecordStarted = false;
+                    }
+
+                    // really restart
+                    if (e.altKey === true && e.which === 192) {
+                        start();
+                        stopEvent(e);
                     }
 
                     // restart if miss key
