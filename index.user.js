@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.4b
+// @version      0.0.5
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -161,9 +161,6 @@
                     // esc
                     if (e.which === 27) {
                         isRecordStarted = false;
-                        cancelButton.click();
-
-                        stopEvent(e);
                         return;
                     }
 
