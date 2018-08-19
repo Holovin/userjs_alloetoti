@@ -242,7 +242,10 @@
         // go next (autoclick!)
         if (messageTextBlock.innerText.startsWith(messageMore)) {
             messageTextBlock.innerText = ' ';
-            refreshKeyboard('Ещё!');
+
+            setTimeout(() => {
+                refreshKeyboard('Ещё!');
+            }, 350);
             return;
         }
 
