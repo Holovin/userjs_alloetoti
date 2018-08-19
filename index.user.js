@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.3
+// @version      0.0.4
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -69,7 +69,13 @@
                 button.textContent = `Баланс (${latestBalance})`;
                 button.disabled = true;
             }
+
+            if (button.textContent.includes('Ещё!')) {
+                button.textContent = `Ещё (${updatesCount})`;
+            }
         });
+
+        console.log('[MU]', buttons);
 
         switch (action) {
             case 'Ещё!': {
@@ -80,7 +86,7 @@
                         if (button.textContent.includes('Баланс')) {
                             button.disabled = false;
 
-                            setTimeout(() => button.click(), 1500);
+                            setTimeout(() => button.click(), 1750);
                             return;
                         }
                     });
@@ -90,10 +96,12 @@
                 updatesCount++;
                 buttons.forEach(button => {
                     if (button.textContent.includes('Ещё!')) {
-                        button.click();
+                        setTimeout(() => button.click(), 1750);
                         return;
                     }
                 });
+
+                return;
             }
 
             default: {
@@ -102,6 +110,7 @@
 
                     // handle keyboard
                     if (e.which >= 49 && e.which <= 57 && buttonIndex < buttons.length && buttonIndex >= 0) {
+                        console.log('[MU] Try button: ', buttons[buttonIndex]);
                         buttons[buttonIndex].click();
 
                         refreshKeyboard();
@@ -259,7 +268,7 @@
         if (messageTextBlock.innerText.startsWith(messageMore)) {
             messageTextBlock.innerText = '<< подождите пару секунд >>';
 
-            setTimeout(() => refreshKeyboard('Ещё!'), 2500);
+            refreshKeyboard('Ещё!');
             return;
         }
 
