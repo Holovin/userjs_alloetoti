@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.8
+// @version      0.0.9
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -156,8 +156,8 @@
                         return;
                     }
 
-                    // esc
-                    if (e.which === 27) {
+                    // esc OR enter
+                    if (e.which === 27 || e.which === 13) {
                         isRecordStarted = false;
                         cancelButton.click();
                         stopEvent(e);
@@ -272,7 +272,7 @@
         // balance (parse)
         if (messageTextBlock.innerText.startsWith(messagePBalance)) {
             latestBalance = messageTextBlock.innerText.split(' ')[2];
-            refreshKeyboard();
+            refreshKeyboard('Ещё!');
             return;
         }
 
