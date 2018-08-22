@@ -86,20 +86,18 @@
                         if (button.textContent.includes('Баланс')) {
                             button.disabled = false;
 
-                            setTimeout(() => button.click(), 1750);
-                            return;
+                            setTimeout(() => button.click(), 1000);
                         }
                     });
 
+                } else {
+                    buttons.forEach(button => {
+                        if (button.textContent.includes('Ещё!')) {
+                            updatesCount++;
+                            setTimeout(() => button.click(), 1500);
+                        }
+                    });
                 }
-
-                buttons.forEach(button => {
-                    if (button.textContent.includes('Ещё!')) {
-                        updatesCount++;
-                        setTimeout(() => button.click(), 1750);
-                        return;
-                    }
-                });
 
                 return;
             }
