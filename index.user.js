@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.6
+// @version      0.0.7
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -141,7 +141,7 @@
                     }
 
                     // send?
-                    if (e.which === 13) {
+                    if (e.which === 9) {
                         isRecordStarted = false;
                         sendButton.click();
 
