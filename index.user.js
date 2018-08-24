@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.9
+// @version      0.0.10
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -18,6 +18,7 @@
     let starterHandler;
     let latestBalance = '?';
     let isRecordStarted = false;
+    let isNeedPlayBefore = true;
     let updatesCount = 0;
 
     const target = document.querySelector('div.im-page-history-w');
@@ -55,7 +56,7 @@
     }
 
     function refreshKeyboard(action, payload) {
-        console.warn(`[MU] Start ${action} (${isRecordStarted}) payload: `, payload);
+        // console.warn(`[MU] Start ${action} (${isRecordStarted}) payload: `, payload);
 
         const buttons = target.querySelectorAll('div.Keyboard Button');
         const startWhichCode = 49; // 1 on keyboard and +1 to next right
@@ -65,18 +66,20 @@
                 button.textContent = `[${index + 1}] ${button.textContent}`;
             }
 
+            // specific logic
             if (button.textContent.includes('Баланс')) {
                 button.textContent = `Баланс (${latestBalance})`;
                 button.disabled = true;
+                return;
             }
 
             if (button.textContent.includes('Ещё!')) {
                 button.textContent = `Ещё! (${updatesCount})`;
+                return;
             }
         });
 
-        console.log('[MU]', buttons);
-
+        // console.log('[MU]', buttons);
         switch (action) {
             case 'Ещё!': {
                 if (updatesCount >= CHECK_EVERY) {
@@ -102,14 +105,28 @@
                 return;
             }
 
+            case 'Autoplay': {
+                setTimeout(() => {
+                    playVoice(payload);
+                    refreshKeyboard();
+                }, 250);
+
+                return;
+            }
+
             default: {
                 document.addEventListener('keydown', e => {
                     const buttonIndex = e.which - startWhichCode;
 
                     // handle keyboard
                     if (e.which >= 49 && e.which <= 57 && buttonIndex < buttons.length && buttonIndex >= 0) {
-                        console.log('[MU] Try button: ', buttons[buttonIndex]);
-                        buttons[buttonIndex].click();
+                        // console.log('[MU] Try button: ', buttons[buttonIndex]);
+                        // play before
+                        if (isNeedPlayBefore && payload) {
+                            playVoice(payload);
+                        } else {
+                            buttons[buttonIndex].click();
+                        }
 
                         refreshKeyboard();
                         stopEvent(e);
@@ -118,22 +135,9 @@
 
                     // voice records/stop
                     if (e.which === 192) {
-                        if (payload) {
-                            // when player is active - two buttons exist
-                            const playButtons = payload.querySelectorAll('button.audio-msg-track--btn');
-                            console.warn('Buttons: ', playButtons);
-
-                            playButtons[playButtons.length - 1].click();
-
-                        } else {
-                            if (!isRecordStarted) {
-                                recordButton.click();
-                            } else {
-                                cancelButton.click();
-                            }
-
-                            isRecordStarted = !isRecordStarted;
-                        }
+                        payload
+                            ? playVoice(payload)
+                            : recordVoice();
 
                         refreshKeyboard('', payload);
                         stopEvent(e);
@@ -173,8 +177,31 @@
         }
     }
 
+    function playVoice(payload) {
+        if (!payload) {
+            alert('Ошибка! Нет payload');
+        }
+
+        // when player is active - two buttons exist
+        const playButtons = payload.querySelectorAll('button.audio-msg-track--btn');
+        // console.warn('Buttons: ', playButtons);
+
+        playButtons[playButtons.length - 1].click();
+        isNeedPlayBefore = false;
+    }
+
+    function recordVoice() {
+        if (!isRecordStarted) {
+            recordButton.click();
+        } else {
+            cancelButton.click();
+        }
+
+        isRecordStarted = !isRecordStarted;
+    }
+
     function stopEvent(e) {
-        console.log('[MU] Stop event: ', e);
+        // console.log('[MU] Stop event: ', e);
         e.preventDefault();
         e.stopImmediatePropagation();
     }
@@ -208,7 +235,7 @@
                     return;
                 }
 
-                console.log('[MU]', mutation);
+                // console.log('[MU]', mutation);
                 processMessage(mutation.target);
             });
         });
@@ -218,7 +245,7 @@
 
     function processMessage(mutation) {
         const messageTextBlock = mutation.querySelector('div.im-mess--text');
-        console.warn('[MU]', messageTextBlock.innerText);
+        // console.warn('[MU]', messageTextBlock.innerText);
 
         const messageThanks = 'Спасибо, сейчас попробую использовать эту команду!';
         const messageCool = 'Крутой трек, надо добавить в свой плейлист!';
@@ -231,6 +258,7 @@
         // ok after recording
         if (messageTextBlock.innerText.startsWith(messageThanks)) {
             messageTextBlock.innerText = 'Проверить: ';
+            isNeedPlayBefore = true;
             return;
         }
 
@@ -277,7 +305,7 @@
         }
 
         // its media?
-        refreshKeyboard('', messageTextBlock);
+        refreshKeyboard('Autoplay', messageTextBlock);
     }
 
     // TODO: use disconnect? or nvm and just close tab?!
