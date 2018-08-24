@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.11
+// @version      0.0.12
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -119,7 +119,7 @@
             case 'Autoplay': {
                 setTimeout(() => {
                     playVoice(payload);
-                    refreshKeyboard();
+                    refreshKeyboard(action, payload);
                 }, 250);
 
                 return;
@@ -143,7 +143,7 @@
                             buttons[buttonIndex].click();
                         }
 
-                        refreshKeyboard();
+                        refreshKeyboard(action, payload);
                         stopEvent(e);
                         return;
                     }
@@ -154,7 +154,7 @@
                             ? playVoice(payload)
                             : recordVoice();
 
-                        refreshKeyboard('', payload);
+                        refreshKeyboard(action, payload);
                         stopEvent(e);
                         return;
                     }
