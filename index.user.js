@@ -11,16 +11,26 @@
 (() => {
     'use strict';
 
-    let lastText = '';
-    let lastMessageId = -1;
     let starterHandler;
-    let latestBalance = '?';
+
+    let lastMessageId = -1;
+    let lastText = '';
+
     let isRecordStarted = false;
     let isNeedPlayBeforeAnyAction = true;
     let isCanRecordWithExtButton = false;
-    let isTimerRunning = false;
-    let isNeedUpdates = true;
-    let timerMessage = '';
+
+    let currentBalance = '?';
+    let sessionBalance = 0;
+
+    const stepsToUpdate = 10;
+    const updateEverySeconds = 60;
+    let updatesCount = 0;
+
+    let sessionStartDate;
+    let sessionStartBalance;
+
+    let statsMessage = '';
 
     const target = document.querySelector('div.im-page-history-w');
     const cancelButton = target.querySelector('button.im-audio-message--cancel-btn[aria-label="Отмена"]');
@@ -54,25 +64,21 @@
 
         processMessage(messages[messages.length - 1]);
         startObserver();
+        startStatCounter();
     }
 
-    function startTimer() {
-        if (isTimerRunning) {
-            return;
+    function changeStats(change) {
+        sessionBalance += change;
+
+        if (Number.isInteger(+currentBalance)) {
+            currentBalance += change;
+
+            const diffBalanceFromStart = currentBalance - sessionStartBalance;
+            const diffMinutesFromStart = Math.round((new Date() - sessionStartDate) / 60);
+            const diffPeriod = (diffBalanceFromStart / diffMinutesFromStart).toFixed(2);
+
+            statsMessage = ` | Среднее за ${updateEverySeconds / 60} мин: ${diffPeriod}`;
         }
-
-        isTimerRunning = true;
-        isNeedUpdates = true;
-
-        let previousBalance = latestBalance;
-
-        setInterval(() => {
-            timerMessage = `| Раньше: ${previousBalance}`;
-            previousBalance = latestBalance;
-            isNeedUpdates = true;
-
-            console.log('[MU] Need balance update');
-        }, 30 * 1000);
     }
 
     function refreshKeyboard(action, payload) {
@@ -93,7 +99,7 @@
 
             // specific logic
             if (button.textContent.includes('Баланс')) {
-                button.textContent = `Баланс (${latestBalance}) ${timerMessage}`;
+                button.textContent = `Баланс (${currentBalance}) ${statsMessage}`;
                 button.disabled = true;
                 return;
             }
@@ -107,8 +113,8 @@
         // console.log('[MU]', buttons);
         switch (action) {
             case 'Ещё!': {
-                if (isNeedUpdates) {
-                    isNeedUpdates = false;
+                if (updatesCount >= stepsToUpdate) {
+                    updatesCount = 0;
 
                     buttons.forEach(button => {
                         if (button.textContent.includes('Баланс')) {
@@ -119,6 +125,8 @@
                     });
 
                 } else {
+                    updatesCount++;
+
                     buttons.forEach(button => {
                         if (button.textContent.includes('Ещё!')) {
                             setTimeout(() => button.click(), 1500);
@@ -182,10 +190,7 @@
                         isCanRecordWithExtButton = false;
 
                         sendButton.click();
-
-                        if (isTimerRunning) {
-                            latestBalance++;
-                        }
+                        changeStats(1);
 
                         stopEvent(e);
                         return;
@@ -199,7 +204,7 @@
                     }
 
                     // esc OR enter
-                    if (e.which === 27 ) {
+                    if (e.which === 27) {
                         isRecordStarted = false;
                         cancelButton.click();
                         stopEvent(e);
@@ -225,6 +230,8 @@
         // console.warn('Buttons: ', playButtons);
 
         if (!playButtons[playButtons.length - 1]) {
+            alert('Что-то пошло не так... Пробуем повторить...');
+
             setTimeout(() => {
                 playVoice(payload);
             }, 500);
@@ -345,11 +352,14 @@
 
         // balance (parse)
         if (messageTextBlock.innerText.startsWith(messagePBalance)) {
-            latestBalance = messageTextBlock.innerText.split(' ')[2];
+            const balance = messageTextBlock.innerText.split(' ')[2];
 
-            if (!isTimerRunning) {
-                startTimer();
+            if (!Number.isInteger(+sessionStartBalance)) {
+                sessionStartBalance = balance;
+                sessionStartDate = new Date();
             }
+
+            currentBalance = balance;
 
             refreshKeyboard('Ещё!');
             return;
