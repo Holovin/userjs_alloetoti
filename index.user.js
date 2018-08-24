@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.10
+// @version      0.0.11
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -19,6 +19,7 @@
     let latestBalance = '?';
     let isRecordStarted = false;
     let isNeedPlayBefore = true;
+    let isCanRecordWithExtButton = false;
     let updatesCount = 0;
 
     const target = document.querySelector('div.im-page-history-w');
@@ -58,8 +59,13 @@
     function refreshKeyboard(action, payload) {
         // console.warn(`[MU] Start ${action} (${isRecordStarted}) payload: `, payload);
 
-        const buttons = target.querySelectorAll('div.Keyboard Button');
+        const buttons = [...target.querySelectorAll('div.Keyboard Button')];
         const startWhichCode = 49; // 1 on keyboard and +1 to next right
+
+        if (buttons.find(button => button.textContent.includes('Не могу'))) {
+            buttons.unshift({textContent: ''});
+            isCanRecordWithExtButton = true;
+        }
 
         buttons.forEach((button, index) => {
             if (!button.textContent.startsWith('[')) {
@@ -77,9 +83,14 @@
                 button.textContent = `Ещё! (${updatesCount})`;
                 return;
             }
+
+            if (button.textContent.includes('Не могу')) {
+                button.textContent = `[1] Начать запись | [2] Поменять на другой`;
+                return;
+            }
         });
 
-        // console.log('[MU]', buttons);
+        console.log('[MU]', buttons);
         switch (action) {
             case 'Ещё!': {
                 if (updatesCount >= CHECK_EVERY) {
@@ -124,6 +135,10 @@
                         // play before
                         if (isNeedPlayBefore && payload) {
                             playVoice(payload);
+
+                        } else if (buttonIndex === 0 && isCanRecordWithExtButton === true) {
+                            recordVoice();
+
                         } else {
                             buttons[buttonIndex].click();
                         }
@@ -145,8 +160,9 @@
                     }
 
                     // send?
-                    if (e.which === 9) {
+                    if (e.which === 9 || e.which === 13) {
                         isRecordStarted = false;
+                        isCanRecordWithExtButton = false;
                         sendButton.click();
 
                         stopEvent(e);
@@ -161,7 +177,7 @@
                     }
 
                     // esc OR enter
-                    if (e.which === 27 || e.which === 13) {
+                    if (e.which === 27 ) {
                         isRecordStarted = false;
                         cancelButton.click();
                         stopEvent(e);
