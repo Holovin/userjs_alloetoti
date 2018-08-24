@@ -11,16 +11,16 @@
 (() => {
     'use strict';
 
-    const CHECK_EVERY = 10;
-
     let lastText = '';
     let lastMessageId = -1;
     let starterHandler;
     let latestBalance = '?';
     let isRecordStarted = false;
-    let isNeedPlayBefore = true;
+    let isNeedPlayBeforeAnyAction = true;
     let isCanRecordWithExtButton = false;
-    let updatesCount = 0;
+    let isTimerRunning = false;
+    let isNeedUpdates = true;
+    let timerMessage = '';
 
     const target = document.querySelector('div.im-page-history-w');
     const cancelButton = target.querySelector('button.im-audio-message--cancel-btn[aria-label="Отмена"]');
@@ -56,6 +56,25 @@
         startObserver();
     }
 
+    function startTimer() {
+        if (isTimerRunning) {
+            return;
+        }
+
+        isTimerRunning = true;
+        isNeedUpdates = true;
+
+        let previousBalance = latestBalance;
+
+        setInterval(() => {
+            timerMessage = `| Раньше: ${previousBalance}`;
+            previousBalance = latestBalance;
+            isNeedUpdates = true;
+
+            console.log('[MU] Need balance update');
+        }, 30 * 1000);
+    }
+
     function refreshKeyboard(action, payload) {
         // console.warn(`[MU] Start ${action} (${isRecordStarted}) payload: `, payload);
 
@@ -74,13 +93,8 @@
 
             // specific logic
             if (button.textContent.includes('Баланс')) {
-                button.textContent = `Баланс (${latestBalance})`;
+                button.textContent = `Баланс (${latestBalance}) ${timerMessage}`;
                 button.disabled = true;
-                return;
-            }
-
-            if (button.textContent.includes('Ещё!')) {
-                button.textContent = `Ещё! (${updatesCount})`;
                 return;
             }
 
@@ -90,11 +104,11 @@
             }
         });
 
-        console.log('[MU]', buttons);
+        // console.log('[MU]', buttons);
         switch (action) {
             case 'Ещё!': {
-                if (updatesCount >= CHECK_EVERY) {
-                    updatesCount = 0;
+                if (isNeedUpdates) {
+                    isNeedUpdates = false;
 
                     buttons.forEach(button => {
                         if (button.textContent.includes('Баланс')) {
@@ -107,7 +121,6 @@
                 } else {
                     buttons.forEach(button => {
                         if (button.textContent.includes('Ещё!')) {
-                            updatesCount++;
                             setTimeout(() => button.click(), 1500);
                         }
                     });
@@ -129,16 +142,20 @@
                 document.addEventListener('keydown', e => {
                     const buttonIndex = e.which - startWhichCode;
 
+
                     // handle keyboard
                     if (e.which >= 49 && e.which <= 57 && buttonIndex < buttons.length && buttonIndex >= 0) {
-                        // console.log('[MU] Try button: ', buttons[buttonIndex]);
+                        console.log('[MU] Try button: ', buttons[buttonIndex].innerText);
                         // play before
-                        if (isNeedPlayBefore && payload) {
+                        if (isNeedPlayBeforeAnyAction && payload) {
                             playVoice(payload);
 
                         } else if (buttonIndex === 0 && isCanRecordWithExtButton === true) {
+                            // buttons moved already, but replace 0 button >>> [0 -> replaced, 0 -> 1...]
                             recordVoice();
-
+                        } else if (buttonIndex !== 0 && isCanRecordWithExtButton === true) {
+                            // revert move back [2 -> 1, 1 -> 0, 0 still replaced, cuz never enter here with condition]
+                            buttons[buttonIndex - 1].click();
                         } else {
                             buttons[buttonIndex].click();
                         }
@@ -165,7 +182,10 @@
                         isCanRecordWithExtButton = false;
 
                         sendButton.click();
-                        latestBalance++;
+
+                        if (isTimerRunning) {
+                            latestBalance++;
+                        }
 
                         stopEvent(e);
                         return;
@@ -204,8 +224,16 @@
         const playButtons = payload.querySelectorAll('button.audio-msg-track--btn');
         // console.warn('Buttons: ', playButtons);
 
+        if (!playButtons[playButtons.length - 1]) {
+            setTimeout(() => {
+                playVoice(payload);
+            }, 500);
+
+            return;
+        }
+
         playButtons[playButtons.length - 1].click();
-        isNeedPlayBefore = false;
+        isNeedPlayBeforeAnyAction = false;
     }
 
     function recordVoice() {
@@ -276,7 +304,7 @@
         // ok after recording
         if (messageTextBlock.innerText.startsWith(messageThanks)) {
             messageTextBlock.innerText = 'Проверить: ';
-            isNeedPlayBefore = true;
+            isNeedPlayBeforeAnyAction = true;
             return;
         }
 
@@ -318,6 +346,11 @@
         // balance (parse)
         if (messageTextBlock.innerText.startsWith(messagePBalance)) {
             latestBalance = messageTextBlock.innerText.split(' ')[2];
+
+            if (!isTimerRunning) {
+                startTimer();
+            }
+
             refreshKeyboard('Ещё!');
             return;
         }
