@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.13
+// @version      0.0.14
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -11,7 +11,7 @@
 (() => {
     'use strict';
 
-    const CHECK_EVERY = 3;
+    const CHECK_EVERY = 10;
 
     let lastText = '';
     let lastMessageId = -1;
@@ -143,7 +143,7 @@
                             buttons[buttonIndex].click();
                         }
 
-                        refreshKeyboard(action, payload);
+                        refreshKeyboard();
                         stopEvent(e);
                         return;
                     }
@@ -154,7 +154,7 @@
                             ? playVoice(payload)
                             : recordVoice();
 
-                        refreshKeyboard(action, payload);
+                        refreshKeyboard('', payload);
                         stopEvent(e);
                         return;
                     }
@@ -163,7 +163,9 @@
                     if (e.which === 9 || e.which === 13) {
                         isRecordStarted = false;
                         isCanRecordWithExtButton = false;
+
                         sendButton.click();
+                        latestBalance++;
 
                         stopEvent(e);
                         return;
