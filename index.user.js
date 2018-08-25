@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.15
+// @version      0.0.16
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -21,11 +21,10 @@
     let isCanRecordWithExtButton = false;
 
     let currentBalance = '?';
-    let sessionBalance = 0;
 
     const stepsToUpdate = 10;
     const updateEverySeconds = 60;
-    let updatesCount = 0;
+    let updatesCount = stepsToUpdate;
 
     let sessionStartDate;
     let sessionStartBalance;
@@ -64,20 +63,17 @@
 
         processMessage(messages[messages.length - 1]);
         startObserver();
-        startStatCounter();
     }
 
     function changeStats(change) {
-        sessionBalance += change;
-
         if (Number.isInteger(+currentBalance)) {
             currentBalance += change;
 
             const diffBalanceFromStart = currentBalance - sessionStartBalance;
-            const diffMinutesFromStart = Math.round((new Date() - sessionStartDate) / 60);
+            const diffMinutesFromStart = (new Date() - sessionStartDate) / (1000 * 60);
             const diffPeriod = (diffBalanceFromStart / diffMinutesFromStart).toFixed(2);
 
-            statsMessage = ` | Среднее за ${updateEverySeconds / 60} мин: ${diffPeriod}`;
+            statsMessage = ` | Среднее за ${updateEverySeconds / 60} мин: ${diffPeriod} | Сессия: ${diffMinutesFromStart.toFixed()} мин.`;
         }
     }
 
@@ -161,9 +157,11 @@
                         } else if (buttonIndex === 0 && isCanRecordWithExtButton === true) {
                             // buttons moved already, but replace 0 button >>> [0 -> replaced, 0 -> 1...]
                             recordVoice();
+
                         } else if (buttonIndex !== 0 && isCanRecordWithExtButton === true) {
                             // revert move back [2 -> 1, 1 -> 0, 0 still replaced, cuz never enter here with condition]
                             buttons[buttonIndex - 1].click();
+
                         } else {
                             buttons[buttonIndex].click();
                         }
@@ -185,7 +183,7 @@
                     }
 
                     // send?
-                    if (e.which === 9 || e.which === 13) {
+                    if (isRecordStarted && (e.which === 9 || e.which === 13)) {
                         isRecordStarted = false;
                         isCanRecordWithExtButton = false;
 
