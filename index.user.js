@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.14
+// @version      0.0.15
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -359,7 +359,7 @@
                 sessionStartDate = new Date();
             }
 
-            currentBalance = balance;
+            currentBalance = +balance;
 
             refreshKeyboard('Ещё!');
             return;
