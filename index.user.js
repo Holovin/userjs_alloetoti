@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.18
+// @version      0.0.19
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -46,7 +46,7 @@
                 start();
                 stopEvent(e);
             }
-        }, true)
+        }, true);
     }
 
     function start() {
@@ -95,7 +95,7 @@
 
             // specific logic
             if (button.textContent.includes('Баланс')) {
-                button.textContent = `Баланс (${currentBalance}) ${statsMessage}`;
+                button.textContent = `Баланс: ${currentBalance} | ${statsMessage}`;
                 button.disabled = true;
                 return;
             }
@@ -223,6 +223,12 @@
         }
     }
 
+    function updateInput(text) {
+        const placeholderBlock = target.querySelector('div.ph_content');
+
+        placeholderBlock.textContent = text;
+    }
+
     function playVoice(payload) {
         if (!payload) {
             alert('Ошибка! Нет payload');
@@ -311,10 +317,15 @@
         const messagePRecord = 'Проигрыватель понимает только голосовую команду, пожалуйста запиши голосовое сообщение со следующим текстом: ';
         const messagePBalance = 'Твой баланс ';
 
+        const iMessageCheck = '[ё] рестарт/пауза войса';
+        const iMessageRecord = '[ё] старт/отмена записи | [tab] отправить';
+        const iMessageDontTouch = ' ';
+
         // ok after recording
         if (messageTextBlock.innerText.startsWith(messageThanks)) {
             messageTextBlock.innerText = 'Проверить: ';
             isNeedPlayBeforeAnyAction = true;
+            updateInput(iMessageCheck);
             return;
         }
 
@@ -335,6 +346,7 @@
             messageTextBlock.innerText = messageTextBlock.innerText.replace(messagePRecord, 'Записать: ');
             lastText = messageTextBlock.innerText;
             refreshKeyboard();
+            updateInput(iMessageRecord);
             return;
         }
 
@@ -342,14 +354,16 @@
         if (messageTextBlock.innerText.startsWith(messageFail)) {
             messageTextBlock.innerText = messageTextBlock.innerText.replace(messagePRecord, `Записать самому: ${lastText}`);
             refreshKeyboard();
+            updateInput(iMessageRecord);
             return;
         }
 
         // go next (autoclick!)
         if (messageTextBlock.innerText.startsWith(messageMore)) {
-            messageTextBlock.innerText = '<< подождите пару секунд >>';
+            messageTextBlock.innerText = 'Подождите...';
 
             refreshKeyboard('Ещё!');
+            updateInput(iMessageDontTouch);
             return;
         }
 
@@ -365,6 +379,7 @@
             currentBalance = +balance;
 
             refreshKeyboard('Ещё!');
+            updateInput(iMessageDontTouch);
             return;
         }
 
