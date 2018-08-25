@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.17
+// @version      0.0.18
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -190,6 +190,9 @@
 
                             sendButton.click();
                             changeStats(1);
+
+                        } else {
+                            refreshKeyboard('', payload);
                         }
 
                         stopEvent(e);
