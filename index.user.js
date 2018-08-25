@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.20
+// @version      0.0.21
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -73,7 +73,7 @@
             const diffMinutesFromStart = (new Date() - sessionStartDate) / (1000 * 60);
             const diffPeriod = (diffBalanceFromStart / diffMinutesFromStart).toFixed(2);
 
-            statsMessage = ` | Среднее за ${updateEverySeconds / 60} мин: ${diffPeriod} | Сессия: ${diffMinutesFromStart.toFixed()} мин.`;
+            statsMessage = `| Среднее за ${updateEverySeconds / 60} мин: ${diffPeriod} | Сессия: ${diffMinutesFromStart.toFixed()} мин.`;
         }
     }
 
@@ -95,7 +95,7 @@
 
             // specific logic
             if (button.textContent.includes('Баланс')) {
-                button.textContent = `Баланс: ${currentBalance} | ${statsMessage}`;
+                button.textContent = `Баланс: ${currentBalance} ${statsMessage}`;
                 button.disabled = true;
                 return;
             }
