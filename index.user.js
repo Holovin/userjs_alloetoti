@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ALLO ETO TI?
 // @namespace    http://holov.in/allo
-// @version      0.0.19
+// @version      0.0.20
 // @description  TI GDE?
 // @author       Alexander Holovin
 // @match        https://vk.com/im?sel=-*
@@ -101,7 +101,7 @@
             }
 
             if (button.textContent.includes('Не могу')) {
-                button.textContent = `[1] Начать запись | [2] Поменять на другой`;
+                button.textContent = `[ё или 1] Начать запись | [tab] Отправить | [2] Поменять на другой`;
                 return;
             }
         });
@@ -346,7 +346,7 @@
             messageTextBlock.innerText = messageTextBlock.innerText.replace(messagePRecord, 'Записать: ');
             lastText = messageTextBlock.innerText;
             refreshKeyboard();
-            updateInput(iMessageRecord);
+            updateInput(iMessageDontTouch);
             return;
         }
 
